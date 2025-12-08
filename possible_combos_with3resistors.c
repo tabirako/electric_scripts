@@ -44,8 +44,13 @@ void recurse(double resistors[], char *exprs[], int count) {
     }
     for (int i = 0; i < count; i++) {
         for (int j = i+1; j < count; j++) {
-            double newArr[count-1];
-            char *newExpr[count-1];
+            //use Dynamic allocation instead of VLA(variable length array)
+            //double newArr[count-1];
+            //char *newExpr[count-1];
+            double *newArr = malloc((count-1) * sizeof(double));
+            char **newExpr = malloc((count-1) * sizeof(char*));
+
+            
             int idx = 0;
             for (int k = 0; k < count; k++) {
                 if (k != i && k != j) {
@@ -61,14 +66,29 @@ void recurse(double resistors[], char *exprs[], int count) {
             newArr[idx] = rS;
             newExpr[idx] = strdup(bufS);
             recurse(newArr, newExpr, count-1);
+            free(newArr);
+            free(newExpr);
 
             // parallel
+            newArr = malloc((count-1) * sizeof(double));
+            newExpr = malloc((count-1) * sizeof(char*));
+            idx = 0;
+            for (int k = 0; k < count; k++) {
+                if (k != i && k != j) {
+                    newArr[idx] = resistors[k];
+                    newExpr[idx] = exprs[k];
+                    idx++;
+                }
+            }
             double rP = parallel(resistors[i], resistors[j]);
             char bufP[128];
             snprintf(bufP, sizeof(bufP), "(%s || %s)", exprs[i], exprs[j]);
             newArr[idx] = rP;
             newExpr[idx] = strdup(bufP);
             recurse(newArr, newExpr, count-1);
+            free(newArr);
+            free(newExpr);
+
         }
     }
 }
