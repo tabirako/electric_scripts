@@ -1,1 +1,6 @@
 /.vscode
+
+# compiled object files
+*.o
+*.obj
+*.exe
